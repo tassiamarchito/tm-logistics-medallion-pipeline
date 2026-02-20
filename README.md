@@ -38,6 +38,15 @@ The project utilizes **Unity Catalog** for full-cycle data governance, ensuring 
 
 ---
 
+### 📊 Data Model (Star Schema)
+The Gold layer is structured in a Star Schema to optimize analytical performance:
+* **Fact Table:** `ft_sales` (Sales metrics and logistics KPIs).
+* **Dimension Tables:** `dm_customers`, `dm_products`, `dm_sellers`.
+
+> **Note on Data Reliability:** The pipeline implements automated schema enforcement and malformed record handling (using `try_cast` and logic filters) to ensure only 100% compliant data reaches the Silver and Gold layers.
+
+---
+
 ### 📂 Notebooks Glossary
 
 Detailed list of notebooks developed for this pipeline, following execution order:
@@ -59,6 +68,45 @@ Detailed list of notebooks developed for this pipeline, following execution orde
 
 ---
 
+### 🔄 Orchestration (Databricks Workflows)
+The entire pipeline is orchestrated using **Databricks Workflows**, ensuring a reliable Directed Acyclic Graph (DAG) execution:
+* **Task Dependency:** Automatic handling of dependencies (e.g., Silver only runs if Bronze succeeds).
+* **Parallel Execution:** Gold dimensions are processed in parallel to optimize cluster time.
+* **Monitoring:** Centralized logging and alerting for pipeline failures.
+
+---
+
+### 🏃 How to Run
+1. **Infrastructure:** Run `nb_criacao_catalogos_schemas_unity` once to set up the Unity Catalog environment.
+2. **One-Click Execution:** Trigger the **`jb_db_logistics_orq`** Workflow in Databricks to run the full flow:
+   `API Ingestion ➡️ Bronze ➡️ Silver ➡️ Gold (Dimensions/Fact) ➡️ OBT`
+
+---
+
+### 🌿 Git Flow & Contribution Policy
+
+To ensure pipeline stability and full traceability of changes within the Lakehouse, this project follows a strict branching and commit policy inspired by **GitHub Flow**:
+
+#### **Branching Strategy**
+* **`main`**: Protected and stable branch. It contains only production-ready, tested, and validated code.
+* **`dev`**: Integration branch for new features before they are merged into production.
+* **`feat/feature-name`**: Temporary branches for developing new notebooks, Gold layer tables, or specific business logic.
+* **`fix/bug-name`**: Dedicated branches for fixing critical issues identified in the Silver or Gold layers.
+
+#### **Commit Guidelines**
+* **Atomic Commits**: Each commit must represent a single logical change (e.g., avoid mixing Silver layer cleaning logic with Gold layer KPI adjustments in the same commit).
+* **Conventional Commits**: Commit messages must follow the industry standard:
+    * `feat(scope)`: Introduction of a new feature (e.g., `feat(gold): create dm_products table`).
+    * `fix(scope)`: Bug fixes or data typing corrections (e.g., `fix(silver): correct try_cast on review_score`).
+    * `docs(scope)`: Documentation-only changes (README updates, comments).
+    * `refactor(scope)`: Code improvements for performance or readability without changing business rules.
+
+#### **Limits & Reviews**
+* **Pull Requests (PR)**: All changes targeting the `main` branch must go through a PR process to ensure data integrity and architectural alignment.
+* **Commit Limit**: We recommend a maximum of 10-15 commits per feature branch to keep Code Reviews manageable and avoid complex merge conflicts.
+
+---
+
 ### 🛠️ Tech Stack
 - **Data Engine:** Databricks (PySpark & Spark SQL)
 - **Ingestion:** Kaggle API (Automated Python Script)
@@ -76,4 +124,5 @@ Detailed list of notebooks developed for this pipeline, following execution orde
 - [x] Bronze Layer: Raw Data Processing & Issue Identification
 - [x] Silver Layer: Fault-tolerant Cleaning & Standardization
 - [x] Gold Layer: Dimensional Modeling & OBT Construction
+- [ ] Workflow Orchestration (Databricks Jobs)
 - [ ] Logistics Insights Dashboard (Databricks AI/BI)
