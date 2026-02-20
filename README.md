@@ -38,6 +38,27 @@ The project utilizes **Unity Catalog** for full-cycle data governance, ensuring 
 
 ---
 
+### 📂 Notebooks Glossary
+
+Detailed list of notebooks developed for this pipeline, following execution order:
+
+#### ⚙️ Setup & Ingestion
+* **`nb_criacao_catalogos_schemas_unity`**: Provisioning of the logical three-level namespace infrastructure in Unity Catalog.
+* **`nb_extracao_dados_kaggle_api`**: Automation script for raw data extraction via Kaggle API.
+
+#### 🥉 Bronze (Raw)
+* **`nb_db_logistics_bronze_ingestao`**: Initial load of source data into Delta format, maintaining full fidelity.
+
+#### 🥈 Silver (Refined)
+* **`nb_db_logistics_silver_tipificacao_dedup`**: Cleansing engine, deduplication, and fault-tolerant data typing.
+
+#### 🥇 Gold (Business)
+* **`nb_db_logistics_gold_dm_customers` / `products` / `sellers`**: Dimensions enriched with geolocation and MD5 hashing.
+* **`nb_db_logistics_gold_ft_sales`**: Central fact table with logistics KPIs and performance metrics.
+* **`nb_db_logistics_gold_obt_sales`**: Denormalized One Big Table for optimized BI consumption.
+
+---
+
 ### 🛠️ Tech Stack
 - **Data Engine:** Databricks (PySpark & Spark SQL)
 - **Ingestion:** Kaggle API (Automated Python Script)
