@@ -37,9 +37,9 @@ This project is designed with **Enterprise Governance** in mind. Although implem
 ---
 
 ### 🛠️ Tech Stack
-- **Data Engine:** Databricks (PySpark)
+- **Data Engine:** Databricks Community (PySpark)
+- **Ingestion:** Kaggle API (Automated Python Script)
 - **Storage:** Delta Lake
-- **Governance:** Unity Catalog
 - **Language:** Python (PySpark) & SQL
 - **Visualization:** Power BI / Databricks AI/BI
 
