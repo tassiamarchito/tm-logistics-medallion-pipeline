@@ -1,55 +1,58 @@
-# 🚚 Lean Logistics: End-to-End Medallion Pipeline
+# 🚚 Lean Logistics: End-to-End Medallion Pipeline (Unity Catalog)
 
 ### 📊 Project Overview
-This project builds a scalable data pipeline for Supply Chain analysis using a **Lakehouse architecture**. Driven by **Lean principles**, we focus on transforming raw operational data into high-performance insights by combining the **Medallion Architecture** with **Unity Catalog** for governance and an **OBT (One Big Table)** delivery strategy.
+This project implements a scalable and governed data pipeline for Supply Chain analysis using a **Lakehouse architecture**. Following **Lean principles**, we transform raw e-commerce data (Olist dataset) into high-performance business insights by combining the **Medallion Architecture** with professional **Unity Catalog** governance.
 
 ---
 
-### 🛡️ Governance & Metastore (Implementation Note)
-This project is designed with **Enterprise Governance** in mind. Although implemented in the **Databricks Community Edition** (using `hive_metastore`), the architecture mimics the naming conventions and logical isolation of **Unity Catalog**:
+### 🛡️ Governance & Unity Catalog Implementation
+The project utilizes **Unity Catalog** for full-cycle data governance, ensuring metadata and security are managed at scale:
 
-- **Logical Catalogs (Simulated):**
-    - `cat_tm_services_bronze`: Raw data ingestion and history.
-    - `cat_tm_services_silver`: Refined and standardized entities.
-    - `cat_tm_services_gold`: Business-ready OBT.
-- **Sustainability:** Developed using the **Free Edition** to ensure the project remains cost-free and accessible for portfolio display.
+- **Three-Level Namespace:** Data is organized as `catalog.schema.table` for production-grade isolation.
+- **Data Discovery:** Implementation of **Discovery Tags** (`quality`, `domain`, `type`) for rapid table search.
+- **Business Glossary:** 100% column-level documentation (Comments) ensuring the "Single Source of Truth" is understandable for business users.
+- **Data Integrity:** Enforcement of `NOT NULL` constraints and `PRIMARY KEY (RELY)` to ensure referential integrity in the Gold layer.
 
 ---
 
 ### 🏗️ Data Architecture: The Medallion Approach
 
-1.  **Bronze (Raw Layer):**
-    - **Process:** Automated data collection via **Kaggle API** directly into **Delta Lake** format.
-    - **Logical Path:** `cat_tm_services_bronze.logistics` (Simulated)
-    - **Goal:** Maintain a full-fidelity history of source data for auditing and re-processing without manual uploads.
+1. **Bronze (Raw Layer)**
+    - **Logical Path:** `cat_tm_services_bronze.db_logistics.tb_[entity]`
+    - **Process:** Automated ingestion into **Delta Lake** format.
+    - **Quality Alert:** Identified critical issues like unescaped line breaks and column shifts in `tb_order_reviews`.
+    - **Goal:** Full-fidelity history for auditing and re-processing.
 
-2.  **Silver (Refined Layer):**
-    - **Process:** Data cleaning, deduplication, handling null values, and schema enforcement.
-    - **Logical Path:** `cat_tm_services_silver.logistics` (Simulated)
-    - **Goal:** Provide a "Single Source of Truth" for cleansed and standardized entities (Orders, Products, Payments).
+2. **Silver (Refined Layer)**
+    - **Logical Path:** `cat_tm_services_silver.db_logistics.tb_[entity]`
+    - **Process:** Hardened data cleaning using `try_cast` and `try_to_date` to prevent pipeline failures from malformed API data.
+    - **Standardization:** Strict naming conventions with prefixes (`cd_`, `ts_`, `dt_`, `vl_`, `nm_`).
+    - **Structure:** 9 curated tables serving as the foundation for analytical modeling.
 
-3.  **Gold (Business Layer - OBT Strategy):**
-    - **Model:** **OBT (One Big Table)**.
-    - **Process:** Final denormalization joining multiple silver entities into a flat structure.
-    - **Logical Path:** `cat_tm_services_gold.logistics` (Simulated)
-    - **Goal:** Maximum performance for BI (Power BI/Databricks AI/BI) and simplified data discovery for business KPIs like **OTIF** and **Lead Time**.
+3. **Gold (Business Layer)**
+    - **Logical Path (Star Schema):** `cat_tm_services_gold.db_logistics.dm_[dimension]` | `ft_[fact]`
+    - **Logical Path (OBT):** `cat_tm_services_gold.db_logistics.obt_sales`
+    - **Dimensional Modeling:** Built a professional Star Schema with Dimension (`dm_`) and Fact (`ft_`) tables.
+    - **OBT (One Big Table) Strategy:** Final denormalization into `obt_sales` for maximum BI performance.
+    - **KPIs:** Automated calculation of delivery performance (Estimated vs. Actual) and shipping metrics.
 
 ---
 
 ### 🛠️ Tech Stack
-- **Data Engine:** Databricks Community (PySpark)
+- **Data Engine:** Databricks (PySpark & Spark SQL)
 - **Ingestion:** Kaggle API (Automated Python Script)
+- **Governance:** Unity Catalog (Tags, Comments, Constraints)
 - **Storage:** Delta Lake
-- **Language:** Python (PySpark) & SQL
-- **Visualization:** Power BI / Databricks AI/BI
+- **Language:** Python & SQL
+- **Architecture:** Medallion + Star Schema + OBT
 
 ---
 
 ### 🚀 Roadmap
 - [x] Repository setup & Folder structure
-- [x] Architectural Design (Medallion + OBT + Governance Simulation)
-- [ ] Automated Data Collection (Kaggle API Notebook)
-- [ ] Bronze Layer: Raw Data Processing
-- [ ] Silver Layer: Data Cleaning & Standardization
-- [ ] Gold Layer: OBT Construction
-- [ ] Logistics Insights Dashboard
+- [x] Architectural Design (Medallion + Star Schema + OBT)
+- [x] Automated Data Collection
+- [x] Bronze Layer: Raw Data Processing & Issue Identification
+- [x] Silver Layer: Fault-tolerant Cleaning & Standardization
+- [x] Gold Layer: Dimensional Modeling & OBT Construction
+- [ ] Logistics Insights Dashboard (Databricks AI/BI)
