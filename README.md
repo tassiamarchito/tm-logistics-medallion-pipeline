@@ -9,6 +9,7 @@ This project implements a scalable and governed data pipeline for Supply Chain a
 The project utilizes **Unity Catalog** for full-cycle data governance, ensuring metadata and security are managed at scale:
 
 - **Three-Level Namespace:** Data is organized as `catalog.schema.table` for production-grade isolation.
+- **Naming Strictness:** All logical paths were updated to the `db_logistics` schema pattern across all catalogs, ensuring a clear namespace for the domain.
 - **Data Discovery:** Implementation of **Discovery Tags** (`quality`, `domain`, `type`) for rapid table search.
 - **Business Glossary:** 100% column-level documentation (Comments) ensuring the "Single Source of Truth" is understandable for business users.
 - **Data Integrity:** Enforcement of `NOT NULL` constraints and `PRIMARY KEY (RELY)` to ensure referential integrity in the Gold layer.
@@ -68,11 +69,15 @@ Detailed list of notebooks developed for this pipeline, following execution orde
 
 ---
 
-### 🔄 Orchestration (Databricks Workflows)
-The entire pipeline is orchestrated using **Databricks Workflows**, ensuring a reliable Directed Acyclic Graph (DAG) execution:
-* **Task Dependency:** Automatic handling of dependencies (e.g., Silver only runs if Bronze succeeds).
-* **Parallel Execution:** Gold dimensions are processed in parallel to optimize cluster time.
-* **Monitoring:** Centralized logging and alerting for pipeline failures.
+### 🔄 Orchestration & IaC (Databricks Workflows)
+The entire pipeline is orchestrated via **Databricks Workflows**, ensuring a reliable and observable Directed Acyclic Graph (DAG) execution:
+
+* **Infrastructure as Code (IaC):** The full job configuration is versioned in `workflows/jb_db_logistics_orq.yml`, allowing for environment portability and DevOps best practices.
+* **Parallel Execution:** To optimize compute resources and reduce runtime, all Dimension tables (`dm_customers`, `dm_products`, `dm_sellers`) are processed concurrently.
+* **Dependency Management:** Strict task mapping ensures that the Fact table (`ft_sales`) and the OBT only execute after all upstream dependencies are successfully validated.
+  
+<img width="1907" height="797" alt="image" src="https://github.com/user-attachments/assets/ac66a252-c659-4718-9048-2a940d4eca14" />
+
 
 ---
 
@@ -120,9 +125,9 @@ To ensure pipeline stability and full traceability of changes within the Lakehou
 ### 🚀 Roadmap
 - [x] Repository setup & Folder structure
 - [x] Architectural Design (Medallion + Star Schema + OBT)
-- [x] Automated Data Collection
+- [x] Automated Data Collection (Kaggle API)
 - [x] Bronze Layer: Raw Data Processing & Issue Identification
 - [x] Silver Layer: Fault-tolerant Cleaning & Standardization
 - [x] Gold Layer: Dimensional Modeling & OBT Construction
-- [ ] Workflow Orchestration (Databricks Jobs)
+- [x] Workflow Orchestration (Databricks Jobs as YAML)
 - [ ] Logistics Insights Dashboard (Databricks AI/BI)
