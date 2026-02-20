@@ -1,0 +1,61 @@
+resources:
+  jobs:
+    jb_db_logistics_orq:
+      name: jb_db_logistics_orq
+      description: "End-to-end orchestration for the Lean Logistics data pipeline.
+        This workflow automates the full Medallion cycle: from Kaggle API
+        ingestion to the final OBT (One Big Table) in the Gold layer. Governed
+        by Unity Catalog, it ensures data integrity through schema enforcement
+        and handles dimension processing in parallel for optimized performance."
+      tasks:
+        - task_key: 00_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/00_setup/nb_extracao_dados_kaggle_api
+            source: WORKSPACE
+        - task_key: 01_Bronze_Layer
+          depends_on:
+            - task_key: 00_Ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/01_bronze/nb_db_logistics_bronze_ingestao
+            source: WORKSPACE
+        - task_key: 02_Silver_Layer
+          depends_on:
+            - task_key: 01_Bronze_Layer
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/02_silver/nb_db_logistics_silver_tipificacao_dedup
+            source: WORKSPACE
+        - task_key: 03_Gold_Dimensions_dm_customers
+          depends_on:
+            - task_key: 02_Silver_Layer
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/03_gold/nb_db_logistics_gold_dm_customers
+            source: WORKSPACE
+        - task_key: 03_Gold_Dimensions_dm_products
+          depends_on:
+            - task_key: 02_Silver_Layer
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/03_gold/nb_db_logistics_gold_dm_products
+            source: WORKSPACE
+        - task_key: 03_Gold_Dimensions_dm_sellers
+          depends_on:
+            - task_key: 02_Silver_Layer
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/03_gold/nb_db_logistics_gold_dm_sellers
+            source: WORKSPACE
+        - task_key: 04_Gold_Fact_ft_sales
+          depends_on:
+            - task_key: 03_Gold_Dimensions_dm_sellers
+            - task_key: 03_Gold_Dimensions_dm_customers
+            - task_key: 03_Gold_Dimensions_dm_products
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/03_gold/nb_db_logistics_gold_ft_sales
+            source: WORKSPACE
+        - task_key: 05_Gold_OBT_obt_sales
+          depends_on:
+            - task_key: 04_Gold_Fact_ft_sales
+          notebook_task:
+            notebook_path: /Workspace/Users/tassia.marchito@gmail.com/tm-logistics-medallion-pipeline/notebooks/03_gold/nb_db_logistics_gold_obt_sales
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
