@@ -1,3 +1,5 @@
+# 🚚 Lean Logistics: End-to-End Medallion Pipeline (Unity Catalog)
+
 ### 📊 Project Overview
 This project implements a scalable and governed data pipeline for Supply Chain analysis using a **Lakehouse architecture**. Following **Lean principles**, we transform raw e-commerce data (Olist dataset) into high-performance business insights by combining the **Medallion Architecture** with professional **Unity Catalog** governance and automated Data Quality (QA) gates.
 
