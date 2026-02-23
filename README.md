@@ -77,7 +77,7 @@ The entire pipeline is orchestrated via **Databricks Workflows**, ensuring a rel
 * **Parallel Execution:** Dimension tables are processed concurrently to optimize compute resources.
 * **Dependency Management:** Fact and OBT layers only trigger after upstream data quality validations are 100% successful.
   
-<img width="1907" height="797" alt="image" src="https://github.com/user-attachments/assets/ac66a252-c659-4718-9048-2a940d4eca14" />
+<img width="1802" height="381" alt="image" src="https://github.com/user-attachments/assets/690e6b42-2165-4077-ad7f-1c66c2a0ef2c" />
 
 ---
 
