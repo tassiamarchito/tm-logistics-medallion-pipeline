@@ -1,18 +1,18 @@
-# 🚚 Lean Logistics: End-to-End Medallion Pipeline (Unity Catalog)
-
 ### 📊 Project Overview
-This project implements a scalable and governed data pipeline for Supply Chain analysis using a **Lakehouse architecture**. Following **Lean principles**, we transform raw e-commerce data (Olist dataset) into high-performance business insights by combining the **Medallion Architecture** with professional **Unity Catalog** governance.
+This project implements a scalable and governed data pipeline for Supply Chain analysis using a **Lakehouse architecture**. Following **Lean principles**, we transform raw e-commerce data (Olist dataset) into high-performance business insights by combining the **Medallion Architecture** with professional **Unity Catalog** governance and automated Data Quality (QA) gates.
 
 ---
 
-### 🛡️ Governance & Unity Catalog Implementation
-The project utilizes **Unity Catalog** for full-cycle data governance, ensuring metadata and security are managed at scale:
+### 🛡️ Governance & Automated Data Quality (QA)
+This pipeline implements **Data Observability** and **Governance-as-Code** through Unity Catalog and a custom QA framework, ensuring 100% reliability for business decisions:
 
-- **Three-Level Namespace:** Data is organized as `catalog.schema.table` for production-grade isolation.
-- **Naming Strictness:** All logical paths were updated to the `db_logistics` schema pattern across all catalogs, ensuring a clear namespace for the domain.
-- **Data Discovery:** Implementation of **Discovery Tags** (`quality`, `domain`, `type`) for rapid table search.
-- **Business Glossary:** 100% column-level documentation (Comments) ensuring the "Single Source of Truth" is understandable for business users.
-- **Data Integrity:** Enforcement of `NOT NULL` constraints and `PRIMARY KEY (RELY)` to ensure referential integrity in the Gold layer.
+- **Three-Level Namespace:** Managed as `catalog.schema.table` for production-grade isolation.
+- **Automated QA Gates:** Every Gold notebook features a validation engine that monitors:
+    - **Primary Key Integrity:** 0% duplication verified across all Dimensions and the Fact table.
+    - **Spatial Accuracy:** Achieved a **99.72%** match rate for customers and **99.77%** for sellers, ensuring precise logistics mapping.
+    - **Revenue Reconciliation:** **99.99% integrity** between item-level prices and total order payments.
+- **Business Glossary:** 100% column-level documentation (Comments) and **Discovery Tags** (`quality`, `domain`, `type`) for rapid data search and cataloging.
+- **Referential Integrity:** Enforcement of `NOT NULL` constraints and `PRIMARY KEY (RELY)` to optimize the Spark Catalyst engine.
 
 ---
 
@@ -20,22 +20,21 @@ The project utilizes **Unity Catalog** for full-cycle data governance, ensuring 
 
 1. **Bronze (Raw Layer)**
     - **Logical Path:** `cat_tm_services_bronze.db_logistics.tb_[entity]`
-    - **Process:** Automated ingestion into **Delta Lake** format.
-    - **Quality Alert:** Identified critical issues like unescaped line breaks and column shifts in `tb_order_reviews`.
-    - **Goal:** Full-fidelity history for auditing and re-processing.
+    - **Process:** Automated ingestion into **Delta Lake** maintaining full historical fidelity.
+    - **Resilience:** Handled unescaped line breaks and malformed characters in `tb_order_reviews` to prevent ingestion crashes.
 
 2. **Silver (Refined Layer)**
     - **Logical Path:** `cat_tm_services_silver.db_logistics.tb_[entity]`
-    - **Process:** Hardened data cleaning using `try_cast` and `try_to_date` to prevent pipeline failures from malformed API data.
-    - **Standardization:** Strict naming conventions with prefixes (`cd_`, `ts_`, `dt_`, `vl_`, `nm_`).
-    - **Structure:** 9 curated tables serving as the foundation for analytical modeling.
+    - **Process:** Hardened cleaning using `try_cast` and `try_to_date` to handle malformed API strings.
+    - **Standardization:** Strict naming conventions with business prefixes (`cd_`, `ts_`, `dt_`, `vl_`, `nm_`).
+    - **Optimization:** Deduplicated geolocation master data (reducing redundancy by ~28%) to stabilize downstream spatial joins.
 
 3. **Gold (Business Layer)**
-    - **Logical Path (Star Schema):** `cat_tm_services_gold.db_logistics.dm_[dimension]` | `ft_[fact]`
-    - **Logical Path (OBT):** `cat_tm_services_gold.db_logistics.obt_sales`
-    - **Dimensional Modeling:** Built a professional Star Schema with Dimension (`dm_`) and Fact (`ft_`) tables.
-    - **OBT (One Big Table) Strategy:** Final denormalization into `obt_sales` for maximum BI performance.
-    - **KPIs:** Automated calculation of delivery performance (Estimated vs. Actual) and shipping metrics.
+    - **Logical Path:** `cat_tm_services_gold.db_logistics.dm_[dimension]` | `ft_[fact]`
+    - **Dimensional Modeling:** Built a professional Star Schema optimized for analytical performance.
+    - **Grain Management:** Resolved a critical **7,088 duplicate composite key** issue in `ft_sales` through pre-join aggregation, ensuring 1:1 transaction integrity.
+    - **OBT (One Big Table):** Final denormalization into `obt_sales` optimized with **Z-ORDER** for sub-second BI dashboard latency.
+    - **KPIs:** Automated calculation of **Lead Time** and **SLA Performance** (Estimated vs. Actual).
 
 ---
 
@@ -53,38 +52,36 @@ The Gold layer is structured in a Star Schema to optimize analytical performance
 Detailed list of notebooks developed for this pipeline, following execution order:
 
 #### ⚙️ Setup & Ingestion
-* **`nb_criacao_catalogos_schemas_unity`**: Provisioning of the logical three-level namespace infrastructure in Unity Catalog.
-* **`nb_extracao_dados_kaggle_api`**: Automation script for raw data extraction via Kaggle API.
+* **`nb_criacao_catalogos_schemas_unity`**: Provisioning of the logical three-level namespace infrastructure.
+* **`nb_extracao_dados_kaggle_api`**: Automation script for raw data extraction.
 
 #### 🥉 Bronze (Raw)
-* **`nb_db_logistics_bronze_ingestao`**: Initial load of source data into Delta format, maintaining full fidelity.
+* **`nb_db_logistics_bronze_ingestao`**: Load of source data into Delta format with full auditing capabilities.
 
 #### 🥈 Silver (Refined)
-* **`nb_db_logistics_silver_tipificacao_dedup`**: Cleansing engine, deduplication, and fault-tolerant data typing.
+* **`nb_db_logistics_silver_tipificacao_dedup`**: Cleansing engine and fault-tolerant data typing.
 
 #### 🥇 Gold (Business)
-* **`nb_db_logistics_gold_dm_customers` / `products` / `sellers`**: Dimensions enriched with geolocation and MD5 hashing.
-* **`nb_db_logistics_gold_ft_sales`**: Central fact table with logistics KPIs and performance metrics.
-* **`nb_db_logistics_gold_obt_sales`**: Denormalized One Big Table for optimized BI consumption.
+* **`nb_db_logistics_gold_dm_customers` / `products` / `sellers`**: Dimensions enriched with spatial aggregation and automated QA Match Rate tests.
+* **`nb_db_logistics_gold_ft_sales`**: Central fact table with aggregated metrics and verified composite PKs.
+* **`nb_db_logistics_gold_obt_sales`**: Denormalized OBT for maximum BI consumption speed.
 
 ---
 
 ### 🔄 Orchestration & IaC (Databricks Workflows)
-The entire pipeline is orchestrated via **Databricks Workflows**, ensuring a reliable and observable Directed Acyclic Graph (DAG) execution:
+The entire pipeline is orchestrated via **Databricks Workflows**, ensuring a reliable and observable execution DAG:
 
-* **Infrastructure as Code (IaC):** The full job configuration is versioned in `workflows/jb_db_logistics_orq.yml`, allowing for environment portability and DevOps best practices.
-* **Parallel Execution:** To optimize compute resources and reduce runtime, all Dimension tables (`dm_customers`, `dm_products`, `dm_sellers`) are processed concurrently.
-* **Dependency Management:** Strict task mapping ensures that the Fact table (`ft_sales`) and the OBT only execute after all upstream dependencies are successfully validated.
+* **Infrastructure as Code (IaC):** Full job configuration versioned in YAML for DevOps best practices.
+* **Parallel Execution:** Dimension tables are processed concurrently to optimize compute resources.
+* **Dependency Management:** Fact and OBT layers only trigger after upstream data quality validations are 100% successful.
   
 <img width="1907" height="797" alt="image" src="https://github.com/user-attachments/assets/ac66a252-c659-4718-9048-2a940d4eca14" />
-
 
 ---
 
 ### 🏃 How to Run
-1. **Infrastructure:** Run `nb_criacao_catalogos_schemas_unity` once to set up the Unity Catalog environment.
-2. **One-Click Execution:** Trigger the **`jb_db_logistics_orq`** Workflow in Databricks to run the full flow:
-   `API Ingestion ➡️ Bronze ➡️ Silver ➡️ Gold (Dimensions/Fact) ➡️ OBT`
+1. **Infrastructure:** Run `nb_criacao_catalogos_schemas_unity` to provision the Unity Catalog environment.
+2. **One-Click Execution:** Trigger the **`jb_db_logistics_orq`** Workflow in Databricks.
 
 ---
 
@@ -115,7 +112,8 @@ To ensure pipeline stability and full traceability of changes within the Lakehou
 ### 🛠️ Tech Stack
 - **Data Engine:** Databricks (PySpark & Spark SQL)
 - **Ingestion:** Kaggle API (Automated Python Script)
-- **Governance:** Unity Catalog (Tags, Comments, Constraints)
+- **Governance:** Unity Catalog (Tags, Comments, Constraints, RELY)
+- **Quality:** Automated Python-based Data Quality Framework
 - **Storage:** Delta Lake
 - **Language:** Python & SQL
 - **Architecture:** Medallion + Star Schema + OBT
@@ -126,8 +124,9 @@ To ensure pipeline stability and full traceability of changes within the Lakehou
 - [x] Repository setup & Folder structure
 - [x] Architectural Design (Medallion + Star Schema + OBT)
 - [x] Automated Data Collection (Kaggle API)
+- [x] Automated QA Gates & Data Observability
 - [x] Bronze Layer: Raw Data Processing & Issue Identification
 - [x] Silver Layer: Fault-tolerant Cleaning & Standardization
 - [x] Gold Layer: Dimensional Modeling & OBT Construction
-- [x] Workflow Orchestration (Databricks Jobs as YAML)
+- [x] Workflow Orchestration (IaC)
 - [ ] Logistics Insights Dashboard (Databricks AI/BI)
