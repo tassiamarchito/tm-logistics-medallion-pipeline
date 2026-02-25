@@ -9,7 +9,7 @@ This project implements a scalable and governed data pipeline for Supply Chain a
 This pipeline implements **Data Observability** and **Governance-as-Code** through Unity Catalog and a custom QA framework, ensuring 100% reliability for business decisions:
 
 - **Three-Level Namespace:** Managed as `catalog.schema.table` for production-grade isolation.
-- **Automated QA Gates:** Every Gold notebook features a validation engine that monitors:
+- **Automated QA Gates:** Every Gold notebook features a validation engine that monitors integrity across the pipeline. This proactive approach **prevents "garbage in, garbage out" and reduces compute waste** by halting failed processes before they hit the final business layer.
     - **Primary Key Integrity:** 0% duplication verified across all Dimensions and the Fact table.
     - **Spatial Accuracy:** Achieved a **99.72%** match rate for customers and **99.77%** for sellers, ensuring precise logistics mapping.
     - **Revenue Reconciliation:** **99.99% integrity** between item-level prices and total order payments.
@@ -34,8 +34,8 @@ This pipeline implements **Data Observability** and **Governance-as-Code** throu
 3. **Gold (Business Layer)**
     - **Logical Path:** `cat_tm_services_gold.db_logistics.dm_[dimension]` | `ft_[fact]`
     - **Dimensional Modeling:** Built a professional Star Schema optimized for analytical performance.
-    - **Grain Management:** Resolved a critical **7,088 duplicate composite key** issue in `ft_sales` through pre-join aggregation, ensuring 1:1 transaction integrity.
-    - **OBT (One Big Table):** Final denormalization into `obt_sales` optimized with **Z-ORDER** for sub-second BI dashboard latency.
+    - **Grain Management:** Resolved a critical issue involving **7,088 duplicate composite keys** in `ft_sales` through pre-join aggregation, ensuring 1:1 transaction integrity.
+    - **OBT (One Big Table):** Final denormalization into `obt_sales` optimized with **Z-ORDERing on high-cardinality columns**, ensuring sub-second latency for Tableau's analytical queries.
     - **KPIs:** Automated calculation of **Lead Time** and **SLA Performance** (Estimated vs. Actual).
 
 ---
