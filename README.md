@@ -122,13 +122,34 @@ To ensure pipeline stability and full traceability of changes within the Lakehou
 
 ---
 
+### 📊 Business Intelligence: Executive Logistics Command Center
+The final stage of the pipeline delivers a high-density **Executive Dashboard** built in Tableau, designed to provide 360° visibility into logistics health.
+
+**[🌐 View Live Dashboard on Tableau Public](https://public.tableau.com/app/profile/t.ssia.marchito/)**
+
+#### **Key Performance Narrative:**
+- **Top-Level KPIs (The "Pulse"):** Real-time monitoring of Revenue, Average Ticket, Total Orders, SLA Rate, Delivery Time, and Freight Costs.
+- **Geographic Strategy:** Dual-axis mapping that correlates **Revenue by State** vs. **Average Freight Value**, allowing executives to identify high-cost regions vs. high-profit hubs instantly.
+- **Operational Health (The "Why"):** - **Fulfillment Cycle:** Visual funnel tracking orders from Approval to Delivery.
+    - **SLA Trend Analysis:** Time-series drift analysis to monitor service level improvements.
+    - **Bottom 10 Categories:** Root-cause analysis identifying which product categories are dragging down the global SLA.
+
+#### **Data-to-Insights Design:**
+- **UX-Driven Layout:** Optimized for "scannability" using a Card-Style design over a neutral background to reduce cognitive load.
+- **Interactive Drill-downs:** Automated cross-filtering between the map and operational charts for deep-dive root cause analysis.
+
+<img width="1919" height="984" alt="image" src="https://github.com/user-attachments/assets/fafa8ce7-2cb5-49b7-b836-8e46b23f4beb" />
+
+---
+
 ### 🚀 Roadmap
 - [x] Repository setup & Folder structure
 - [x] Architectural Design (Medallion + Star Schema + OBT)
 - [x] Automated Data Collection (Kaggle API)
 - [x] Automated QA Gates & Data Observability
-- [x] Bronze Layer: Raw Data Processing & Issue Identification
-- [x] Silver Layer: Fault-tolerant Cleaning & Standardization
+- [x] Bronze Layer: Raw Data Processing
+- [x] Silver Layer: Fault-tolerant Cleaning
 - [x] Gold Layer: Dimensional Modeling & OBT Construction
 - [x] Workflow Orchestration (IaC)
-- [ ] Logistics Insights Dashboard (Databricks AI/BI)
+- [x] **Logistics Insights Dashboard (Tableau Public)**
+- [ ] Predictive Analytics for Lead Time (Future Scope)
